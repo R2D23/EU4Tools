@@ -1,0 +1,3 @@
+[submodule "yamlbeans"]
+	path = yamlbeans
+	url = https://github.com/EsotericSoftware/yamlbeans
