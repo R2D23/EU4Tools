@@ -3,7 +3,9 @@ package r2d23.EU4resources;
 import java.awt.Image;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Vector;
 import static r2d23.EU4resources.EU4Directories.*;
 
