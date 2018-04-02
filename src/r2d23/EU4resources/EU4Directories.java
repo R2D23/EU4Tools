@@ -1,7 +1,14 @@
 package r2d23.EU4resources;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,6 +18,8 @@ import java.util.logging.Logger;
  * @author LuisArturo
  */
 public class EU4Directories {
+
+    private static HashMap<String, String> localization = null;
 
     /**
      * The default path of the game installation.
@@ -36,18 +45,43 @@ public class EU4Directories {
 	}
     }
 
-    /**
-     * Verifies if the path does locate the game files. This call looks for the
-     * EU4.exe game file. If the <code>gamePath</code> field remains null, it
-     * will also set it to default values beforehand.
-     * <p>
-     * @throws Exception If the game file isn't found.
-     */
-    private static void verify() throws Exception {
-	if (gamePath == null)
-	    gamePath = Paths.get(DEFAULT_PATH);
-	if (!gamePath.resolve("eu4.exe").toFile().canRead())
-	    throw new Exception();
+    public static File getCountryTagsFile() {
+	return gamePath.resolve("common\\country_tags\\00_countries.txt").toFile();
+    }
+
+    public static File getFlagsFile() {
+	return gamePath.resolve("gfx\\flags").toFile();
+    }
+
+    public static String getLocalization(String s) throws IOException {
+	if (localization == null) {
+	    localization = new HashMap<>();
+	    File[] files = getLocalizationFiles();
+	    BufferedReader r;
+	    for (File file : getLocalizationFiles()) {
+		r = Files.newBufferedReader(file.toPath());
+		for (String aux = r.readLine(); aux != null; aux = r.readLine()) {
+		    String[] strings = aux.split(":");
+		    if (strings.length == 2) {
+			strings[0] = strings[0].trim();
+			if (strings[1].contains("\"") && strings[1].split("\"").length > 1)
+			    strings[1] = strings[1].split("\"")[1];
+			if (strings[0] != null && strings[1] != null)
+			    localization.put(strings[0], strings[1]);
+		    }
+		}
+	    }
+	}
+	return localization.get(s);
+    }
+
+    public static File[] getLocalizationFiles() throws IOException {
+	Vector<File> auxV = new Vector<>();
+	File aux = gamePath.resolve("localisation\\").toFile();
+	for (File auxF : aux.listFiles())
+	    if (auxF.toString().contains("english.yml"))
+		auxV.add(auxF);
+	return auxV.toArray(new File[auxV.size()]);
     }
 
     /**
@@ -60,14 +94,16 @@ public class EU4Directories {
     }
 
     /**
-     * Returns the path of the Country Names. A simple call that joins the
-     * <code>gamePath</code> and the known location of the country names in the
-     * game files. Future versions may deliver different results according to
-     * the main app localization.
+     * Verifies if the path does locate the game files. This call looks for the
+     * EU4.exe game file. If the <code>gamePath</code> field remains null, it
+     * will also set it to default values beforehand.
      * <p>
-     * @return The path where the country names, in YML format, is.
+     * @throws Exception If the game file isn't found.
      */
-    public static Path getCountryNamesPath() {
-	return gamePath.resolve("localisation\\countries_l_english.yml");
+    private static void verify() throws Exception {
+	if (gamePath == null)
+	    gamePath = Paths.get(DEFAULT_PATH);
+	if (!gamePath.resolve("eu4.exe").toFile().canRead())
+	    throw new Exception();
     }
 }
